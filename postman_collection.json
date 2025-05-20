@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "b5e2e3c0-5b1a-4e1a-8e1a-0e1a5b1a4e1a",
+		"name": "Goose Game API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login as Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/auth/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login as Nikita",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"nikita\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/auth/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login as Survivor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"survivor1\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/auth/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Rounds",
+			"item": [
+				{
+					"name": "Create Round (Admin only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Round 1\",\n    \"startAt\": \"2024-03-19T10:00:00Z\",\n    \"endAt\": \"2024-03-19T20:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/rounds",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["rounds"]
+						}
+					}
+				},
+				{
+					"name": "Get All Rounds",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/rounds",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["rounds"]
+						}
+					}
+				},
+				{
+					"name": "Get Round Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/rounds/{{roundId}}/details",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["rounds", "{{roundId}}", "details"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Goose",
+			"item": [
+				{
+					"name": "Tap Goose (Survivor)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{survivorToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/goose/tap/{{roundId}}",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["goose", "tap", "{{roundId}}"]
+						}
+					}
+				},
+				{
+					"name": "Tap Goose (Nikita)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{nikitaToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/goose/tap/{{roundId}}",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["goose", "tap", "{{roundId}}"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "adminToken",
+			"value": ""
+		},
+		{
+			"key": "nikitaToken",
+			"value": ""
+		},
+		{
+			"key": "survivorToken",
+			"value": ""
+		},
+		{
+			"key": "roundId",
+			"value": ""
+		}
+	]
+} 
