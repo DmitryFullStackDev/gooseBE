@@ -3,26 +3,42 @@ import { RoundService } from '../services/round.service';
 import {Roles} from "../decorators/roles.decorator";
 import {RolesGuard} from "../guards/roles.guard";
 import {JwtAuthGuard} from "../guards/jwt-auth.guard";
+import { RoundConfigService } from '../config/round.config';
 
 @Controller('rounds')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class RoundController {
-    constructor(private readonly roundService: RoundService) {}
+    constructor(
+        private readonly roundService: RoundService,
+        private readonly roundConfigService: RoundConfigService
+    ) {}
 
     @Post()
     @Roles('admin')
-    async create(@Body() body: { title: string; startAt: string; endAt: string }, @Request() req) {
-        return this.roundService.createRound(
-            body.title,
-            new Date(body.startAt),
-            new Date(body.endAt),
-        );
+    async create(@Body() body: { title: string }) {
+        const round = await this.roundService.createRound(body.title);
+        const config = this.roundConfigService.config;
+        return {
+            ...round.toJSON(),
+            config: {
+                roundDuration: config.roundDuration,
+                cooldownDuration: config.cooldownDuration
+            }
+        };
     }
 
     @Get()
     @UseGuards(JwtAuthGuard)
     async getAll() {
-        return this.roundService.findAllRounds();
+        const rounds = await this.roundService.findAllRounds();
+        const config = this.roundConfigService.config;
+        return {
+            rounds,
+            config: {
+                roundDuration: config.roundDuration,
+                cooldownDuration: config.cooldownDuration
+            }
+        };
     }
 
     @UseGuards(JwtAuthGuard)

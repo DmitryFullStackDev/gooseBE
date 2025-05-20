@@ -98,7 +98,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Round 1\",\n    \"startAt\": \"2024-03-19T10:00:00Z\",\n    \"endAt\": \"2024-03-19T20:00:00Z\"\n}"
+							"raw": "{\n    \"title\": \"Round 1\"\n}"
 						},
 						"url": {
 							"raw": "http://localhost:3000/rounds",

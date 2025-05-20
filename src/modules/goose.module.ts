@@ -6,8 +6,8 @@ import { UserRoundStats } from '../models/user-round-stats.model';
 import { GooseController } from '../controllers/goose.controller';
 import { GooseService } from '../services/goose.service';
 import { UserService } from '../services/user.service';
-import { RoundService } from '../services/round.service';
 import { UserRoundStatsService } from '../services/userRoundStats.service';
+import { RoundModule } from './round.module';
 
 @Module({
     imports: [
@@ -15,13 +15,13 @@ import { UserRoundStatsService } from '../services/userRoundStats.service';
             User,
             Round,
             UserRoundStats
-        ])
+        ]),
+        RoundModule
     ],
     controllers: [GooseController],
     providers: [
         GooseService,
         UserService,
-        RoundService,
         UserRoundStatsService
     ],
     exports: [GooseService]
