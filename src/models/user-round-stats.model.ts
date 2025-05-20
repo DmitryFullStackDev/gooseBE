@@ -1,21 +1,35 @@
-import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, ForeignKey, BelongsTo, DataType } from 'sequelize-typescript';
 import { User } from './user.model';
 import { Round } from './round.model';
 
 @Table
 export class UserRoundStats extends Model {
     @ForeignKey(() => User)
-    @Column
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
     userId: number;
 
     @ForeignKey(() => Round)
-    @Column
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
     roundId: number;
 
-    @Column({ defaultValue: 0 })
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    })
     tapsCount: number;
 
-    @Column({ defaultValue: 0 })
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    })
     points: number;
 
     @BelongsTo(() => User)

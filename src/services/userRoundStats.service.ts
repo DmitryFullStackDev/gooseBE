@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import {UserRoundStats} from "../models/user-round-stats.model";
-import {Round} from "../models/round.model";
+import { UserRoundStats } from "../models/user-round-stats.model";
+import { Round } from "../models/round.model";
 
 @Injectable()
 export class UserRoundStatsService {
@@ -19,26 +19,28 @@ export class UserRoundStatsService {
     async incrementTapAndPoints(
         userId: number,
         roundId: number,
-    ): Promise<{ tapsCount: number; points: number }> {
+    ): Promise<UserRoundStats> {
         return this.sequelize.transaction(async (t) => {
-            let stats = await this.statsModel.findOne({
+            const [stats, created] = await this.statsModel.findOrCreate({
                 where: { userId, roundId },
+                defaults: {
+                    userId,
+                    roundId,
+                    tapsCount: 0,
+                    points: 0
+                },
                 transaction: t,
-                lock: t.LOCK.UPDATE,
+                lock: true
             });
-
-            if (!stats) {
-                stats = await this.statsModel.create(
-                    { userId, roundId, tapsCount: 0, points: 0 },
-                    { transaction: t }
-                );
-            }
 
             const pointsToAdd = this.calculatePointsForTap(stats.tapsCount);
 
-            stats.tapsCount += 1;
-            stats.points += pointsToAdd;
-            await stats.save({ transaction: t });
+            await stats.increment({
+                tapsCount: 1,
+                points: pointsToAdd
+            }, { transaction: t });
+
+            await stats.reload({ transaction: t });
 
             await this.roundModel.increment('totalPoints', {
                 by: pointsToAdd,
@@ -46,10 +48,7 @@ export class UserRoundStatsService {
                 transaction: t,
             });
 
-            return {
-                tapsCount: stats.tapsCount,
-                points: stats.points,
-            };
+            return stats;
         });
     }
 }

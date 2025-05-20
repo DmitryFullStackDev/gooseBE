@@ -25,11 +25,12 @@ export class GooseService {
         const round = await this.roundService.findById(roundId);
         this.roundService.checkIsActive(round);
 
-        const result = await this.statsService.incrementTapAndPoints(user.userId, roundId);
+        const stats = await this.statsService.incrementTapAndPoints(user.userId, roundId);
+        console.log(stats)
         return {
             message: 'Tap counted',
-            tapsCount: result.tapsCount,
-            points: result.points
+            tapsCount: stats.dataValues.tapsCount,
+            points: stats.dataValues.points
         };
     }
 }
