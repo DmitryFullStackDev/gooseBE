@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { UserRoundStatsService } from "./userRoundStats.service";
 import { RoundService } from "./round.service";
 import { UserService } from "./user.service";
+import { JwtPayload } from '../types/jwt-payload.type';
+import { TapResponse } from '../types/tap-response.type';
 
 @Injectable()
 export class GooseService {
@@ -11,9 +13,7 @@ export class GooseService {
         private readonly statsService: UserRoundStatsService,
     ) {}
 
-    async tap(userId: number, roundId: number) {
-        const user = await this.userService.findById(userId);
-
+    async tap(user: JwtPayload, roundId: number): Promise<TapResponse> {
         if (user.role === 'nikita') {
             return {
                 message: 'Tap received but not counted (Nikita)',
@@ -25,6 +25,11 @@ export class GooseService {
         const round = await this.roundService.findById(roundId);
         this.roundService.checkIsActive(round);
 
-        return this.statsService.incrementTapAndPoints(userId, roundId);
+        const result = await this.statsService.incrementTapAndPoints(user.userId, roundId);
+        return {
+            message: 'Tap counted',
+            tapsCount: result.tapsCount,
+            points: result.points
+        };
     }
 }
