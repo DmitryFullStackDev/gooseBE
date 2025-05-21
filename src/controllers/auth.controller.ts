@@ -1,7 +1,18 @@
-import { Controller, Post, Body, BadRequestException, UnauthorizedException, Res, Get, UseGuards } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Body,
+    BadRequestException,
+    UnauthorizedException,
+    Res,
+    Get,
+    UseGuards,
+    UseInterceptors
+} from '@nestjs/common';
 import { AuthService } from "../services/auth.service";
 import { Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import {authCookieInterceptor} from "../interceptors/authCookieInterceptor";
 
 class LoginDto {
     username: string;
@@ -12,22 +23,13 @@ class LoginDto {
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
+    @UseInterceptors(authCookieInterceptor)
     @Post('login')
     async login(
         @Body() loginDto: LoginDto,
         @Res({ passthrough: true }) response: Response
     ) {
-        try {
-            const result = await this.authService.login(loginDto.username, loginDto.password, response);
-            return result;
-        } catch (e) {
-            if (e instanceof BadRequestException || e instanceof UnauthorizedException) {
-                return {
-                    error: e.message,
-                };
-            }
-            throw e;
-        }
+        return this.authService.login(loginDto.username, loginDto.password, response);
     }
 
     @UseGuards(JwtAuthGuard)

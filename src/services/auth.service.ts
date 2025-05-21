@@ -51,21 +51,16 @@ export class AuthService {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.dataValues.passwordHash);
+
         if (!isPasswordValid) {
-            throw new UnauthorizedException('Password incorrect');
+            throw new UnauthorizedException('Invalid email or password');
         }
 
         const payload = { sub: user.dataValues.id, username: user.dataValues.username, role: user.dataValues.role };
         const token = this.jwtService.sign(payload);
 
-        response.cookie('access_token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 1000
-        });
-
         return {
+            token,
             message: 'Login successful',
             user: {
                 id: user.dataValues.id,
