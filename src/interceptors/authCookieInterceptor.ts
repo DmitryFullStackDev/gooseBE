@@ -19,7 +19,7 @@ export class authCookieInterceptor implements NestInterceptor {
                 if (data && data.token) {
                     response.cookie('access_token', data.token, {
                         httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
+                        secure: false,
                         sameSite: 'lax',
                         maxAge: 24 * 60 * 60 * 1000, // 1 day
                     });
