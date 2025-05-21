@@ -18,20 +18,18 @@ import { ScheduleModule } from '@nestjs/schedule';
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
+        url: configService.getOrThrow('DATABASE_URL'),
         dialect: 'postgres',
-        username: configService.getOrThrow('DB_USERNAME'),
-        password: configService.getOrThrow('DB_PASSWORD'),
-        database: configService.getOrThrow('DB_DATABASE'),
-        host: configService.getOrThrow('DB_HOST'),
-        port: configService.getOrThrow<number>('DB_PORT'),
         models: [User, Round, UserRoundStats],
         autoLoadModels: true,
-        sync: { force: true },
-        timezone: '+00:00',
+        sync: { force: true }, // ❗ For dev only! Remove in production
         dialectOptions: {
-          useUTC: true,
-          timezone: '+00:00'
-        }
+          ssl: {
+            require: true,
+            rejectUnauthorized: false, // Accept self-signed certs (Render's default)
+          },
+        },
+        timezone: '+00:00',
       }),
     }),
     AuthModule,
