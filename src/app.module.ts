@@ -23,6 +23,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 
         return {
           url: databaseUrl,
+          logging: console.log,
           dialect: 'postgres',
           models: [User, Round, UserRoundStats],
           autoLoadModels: true,
