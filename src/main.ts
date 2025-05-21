@@ -7,7 +7,7 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'https://goose-fe-dmitryfullstackdevs-projects.vercel.app',
-    'https://goose-fe.vercel.app/login',
+    'https://goose-fe.vercel.app',
     'https://goose-fe-dmitryfullstackdevs-projects.vercel.app',
   ];
 
