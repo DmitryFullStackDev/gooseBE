@@ -20,7 +20,7 @@ export class authCookieInterceptor implements NestInterceptor {
                     response.cookie('access_token', data.token, {
                         httpOnly: true,
                         secure: false,
-                        sameSite: 'lax',
+                        sameSite: 'none',
                         maxAge: 24 * 60 * 60 * 1000, // 1 day
                     });
                     delete data.token;
