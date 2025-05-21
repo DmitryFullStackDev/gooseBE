@@ -33,14 +33,8 @@ export class AuthService {
             const payload = { sub: newUser.dataValues.id, username: newUser.dataValues.username, role: newUser.dataValues.role };
             const token = this.jwtService.sign(payload);
 
-            response.cookie('access_token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 24 * 60 * 60 * 1000
-            });
-
             return {
+                token,
                 message: 'User created',
                 user: {
                     id: newUser.dataValues.id,
