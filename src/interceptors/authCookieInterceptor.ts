@@ -18,8 +18,9 @@ export class authCookieInterceptor implements NestInterceptor {
             tap((data) => {
                 if (data && data.token) {
                     response.cookie('access_token', data.token, {
-                        secure: false,
-                        sameSite: 'none',
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: 'lax',
                         maxAge: 24 * 60 * 60 * 1000, // 1 day
                     });
                     delete data.token;

@@ -7,9 +7,14 @@ import { UserRoundStats } from "./models/user-round-stats.model";
 import { RoundModule } from "./modules/round.module";
 import { GooseModule } from "./modules/goose.module";
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import {ServeStaticModule} from "@nestjs/serve-static";
+import { join } from "path"
 
 @Module({
     imports: [
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, '..', 'front', 'dist'),
+        }),
         ConfigModule.forRoot({
             isGlobal: true,
         }),
