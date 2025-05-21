@@ -25,8 +25,13 @@ export class RoundService {
 
     checkIsActive(round: Round): void {
         const now = this.getNowUTC();
-        if (now < round.startAt || now > round.endAt) {
-            throw new ConflictException('Round is not active');
+
+        if (now < round.dataValues.startAt) {
+            throw new ConflictException('Round has not started yet');
+        }
+
+        if (now > round.dataValues.endAt) {
+            throw new ConflictException('Round has already ended');
         }
     }
 
@@ -54,17 +59,12 @@ export class RoundService {
         }
 
         const { startAt, endAt } = this.calculateRoundDates();
-        console.log('Creating round with dates:', {
-            startAt: startAt.toISOString(),
-            endAt: endAt.toISOString()
-        });
 
         const round = await this.roundModel.create({
             startAt: startAt.toISOString(),
             endAt: endAt.toISOString(),
         });
 
-        console.log('Created round:', round.toJSON());
         return round;
     }
 
@@ -82,16 +82,12 @@ export class RoundService {
         const now = this.getNowUTC();
 
         const roundData = round.toJSON();
-        console.log('Complete round data:', JSON.stringify(roundData, null, 2));
-        console.log('Current time:', now);
 
         let startTime: Date | null = null;
         try {
             if (roundData && roundData.startAt) {
                 startTime = new Date(roundData.startAt);
-                console.log('Parsed start time:', startTime);
             } else {
-                console.log('No start time found in round data');
             }
         } catch (error) {
             console.error('Error parsing start time:', error);
@@ -104,11 +100,7 @@ export class RoundService {
             if (startTimeMs > currentTime) {
                 timeUntilStart = Math.ceil((startTimeMs - currentTime) / 1000);
             }
-            console.log('Time calculation:', {
-                startTimeMs,
-                currentTime,
-                timeUntilStart
-            });
+
         }
 
         if (roundData.endAt) {
@@ -135,7 +127,6 @@ export class RoundService {
             userPoints: userStats ? userStats.points : 0,
         };
 
-        console.log('Final response:', JSON.stringify(response, null, 2));
         return response;
     }
 }

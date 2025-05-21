@@ -26,7 +26,7 @@ export class GooseService {
         this.roundService.checkIsActive(round);
 
         const stats = await this.statsService.incrementTapAndPoints(user.userId, roundId);
-        console.log(stats)
+
         return {
             message: 'Tap counted',
             tapsCount: stats.dataValues.tapsCount,
