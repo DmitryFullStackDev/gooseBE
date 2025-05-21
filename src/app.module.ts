@@ -10,38 +10,33 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    ScheduleModule.forRoot(),
-    SequelizeModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const databaseUrl = configService.getOrThrow('DATABASE_URL');
-        const isInternal = databaseUrl.includes('svc-'); // crude check for internal host
-
-        return {
-          url: databaseUrl,
-          logging: console.log,
-          dialect: 'postgres',
-          models: [User, Round, UserRoundStats],
-          autoLoadModels: true,
-          timezone: '+00:00',
-          dialectOptions: isInternal
-              ? {}
-              : {
-                ssl: {
-                  require: true,
-                  rejectUnauthorized: false,
-                },
-              },
-        };
-      },
-    }),
-    AuthModule,
-    RoundModule,
-    GooseModule
-  ]
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+        ScheduleModule.forRoot(),
+        SequelizeModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => ({
+                dialect: 'postgres',
+                username: configService.getOrThrow('DB_USERNAME'),
+                password: configService.getOrThrow('DB_PASSWORD'),
+                database: configService.getOrThrow('DB_DATABASE'),
+                host: configService.getOrThrow('DB_HOST'),
+                port: configService.getOrThrow<number>('DB_PORT'),
+                models: [User, Round, UserRoundStats],
+                autoLoadModels: true,
+                sync: { force: true },
+                timezone: '+00:00',
+                dialectOptions: {
+                    useUTC: true,
+                    timezone: '+00:00'
+                }
+            }),
+        } as any),
+        AuthModule,
+        RoundModule,
+        GooseModule
+    ]
 })
 export class AppModule {}
