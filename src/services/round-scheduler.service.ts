@@ -20,7 +20,6 @@ export class RoundSchedulerService {
         this.logger.log('RoundSchedulerService initialized');
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleEndedRounds() {
         try {
             this.logger.debug('Checking for ended rounds...');

@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException, ConflictException, ForbiddenException} from '@nestjs/common';
+import {Injectable, NotFoundException, ConflictException, ForbiddenException, Logger} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import {Round} from "../models/round.model";
 import {async} from "rxjs";
@@ -6,14 +6,18 @@ import {UserRoundStats} from "../models/user-round-stats.model";
 import { RoundConfigService } from '../config/round.config';
 import { User } from '../models/user.model';
 import { WinnerInfo, RoundDetails } from '../types/round.types';
+import { Sequelize } from 'sequelize-typescript';
+import { Op, QueryTypes } from 'sequelize';
 
 @Injectable()
 export class RoundService {
+    private readonly logger = new Logger(RoundService.name);
     constructor(
         @InjectModel(Round) private roundModel: typeof Round,
         @InjectModel(UserRoundStats) private userRoundStatsModel: typeof UserRoundStats,
         @InjectModel(User) private userModel: typeof User,
-        private roundConfigService: RoundConfigService
+        private roundConfigService: RoundConfigService,
+        private sequelize: Sequelize
     ) {}
 
     async findById(id: number): Promise<Round> {
@@ -139,5 +143,49 @@ export class RoundService {
         };
 
         return response;
+    }
+
+    async setWinner(roundId: number, userId: number) {
+        await this.sequelize.transaction(async (t) => {
+            const [lockedRound] = await this.sequelize.query(
+                'SELECT * FROM "Rounds" WHERE id = ? AND "winnerId" IS NULL FOR UPDATE OF "Rounds" SKIP LOCKED',
+                {
+                    replacements: [roundId],
+                    type: QueryTypes.SELECT,
+                    transaction: t
+                }
+            );
+
+            if (!lockedRound) {
+                this.logger.debug(`Round ${roundId} not found, already has a winner, or is locked`);
+                return this.findByIdWithDetails(roundId, userId);
+            }
+
+            const winnerStats = await this.userRoundStatsModel.findOne({
+                where: { roundId },
+                order: [['points', 'DESC']],
+                include: [{ model: User }],
+                transaction: t
+            });
+
+            if (winnerStats) {
+                const winner = await this.userModel.findByPk(winnerStats.dataValues.userId, { transaction: t });
+                this.logger.log(`Setting winner for round ${roundId}: User ${winnerStats.dataValues.userId} with ${winnerStats.dataValues.points} points`, winnerStats);
+
+                await this.sequelize.query(
+                    'UPDATE "Rounds" SET "winnerId" = ? WHERE id = ?',
+                    {
+                        replacements: [winnerStats.dataValues.userId, roundId],
+                        type: QueryTypes.UPDATE,
+                        transaction: t
+                    }
+                );
+            } else {
+                this.logger.debug(`No participants found for round ${roundId}`);
+                return this.findByIdWithDetails(roundId, userId);
+            }
+        });
+
+        return this.findByIdWithDetails(roundId, userId);
     }
 }

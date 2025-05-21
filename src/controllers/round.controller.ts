@@ -50,4 +50,13 @@ export class RoundController {
     ): Promise<RoundDetails> {
         return this.roundService.findByIdWithDetails(id, req.user.userId);
     }
+
+    @Post(':id/set-winner')
+    @UseGuards(JwtAuthGuard)
+    async setWinner(
+        @Param('id', ParseIntPipe) id: number,
+        @Request() req,
+    ) {
+        return this.roundService.setWinner(id, req.user.userId);
+    }
 }
