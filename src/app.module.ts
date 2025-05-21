@@ -7,12 +7,14 @@ import { UserRoundStats } from "./models/user-round-stats.model";
 import { RoundModule } from "./modules/round.module";
 import { GooseModule } from "./modules/goose.module";
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -35,6 +37,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AuthModule,
     RoundModule,
     GooseModule
-  ],
+  ]
 })
 export class AppModule {}

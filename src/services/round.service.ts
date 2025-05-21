@@ -4,12 +4,15 @@ import {Round} from "../models/round.model";
 import {async} from "rxjs";
 import {UserRoundStats} from "../models/user-round-stats.model";
 import { RoundConfigService } from '../config/round.config';
+import { User } from '../models/user.model';
+import { WinnerInfo, RoundDetails } from '../types/round.types';
 
 @Injectable()
 export class RoundService {
     constructor(
         @InjectModel(Round) private roundModel: typeof Round,
         @InjectModel(UserRoundStats) private userRoundStatsModel: typeof UserRoundStats,
+        @InjectModel(User) private userModel: typeof User,
         private roundConfigService: RoundConfigService
     ) {}
 
@@ -74,20 +77,24 @@ export class RoundService {
         });
     }
 
-    async findByIdWithDetails(roundId: number, userId: number) {
-        const round = await this.roundModel.findByPk(roundId);
+    async findByIdWithDetails(roundId: number, userId: number): Promise<RoundDetails> {
+        const round = await this.roundModel.findByPk(roundId, {
+            include: [{
+                model: User,
+                as: 'winner',
+                attributes: ['username']
+            }]
+        });
+
         if (!round) throw new NotFoundException('Round not found');
 
-        let winnerStats: UserRoundStats | null = null;
         const now = this.getNowUTC();
-
         const roundData = round.toJSON();
 
         let startTime: Date | null = null;
         try {
             if (roundData && roundData.startAt) {
                 startTime = new Date(roundData.startAt);
-            } else {
             }
         } catch (error) {
             console.error('Error parsing start time:', error);
@@ -100,16 +107,23 @@ export class RoundService {
             if (startTimeMs > currentTime) {
                 timeUntilStart = Math.ceil((startTimeMs - currentTime) / 1000);
             }
-
         }
 
-        if (roundData.endAt) {
-            const endTime = new Date(roundData.endAt);
-            if (!isNaN(endTime.getTime()) && endTime < now) {
-                winnerStats = await this.userRoundStatsModel.findOne({
-                    where: { roundId },
-                    order: [['points', 'DESC']],
-                });
+        let winnerInfo: WinnerInfo | null = null;
+        if (roundData.winnerId) {
+            const winnerStats = await this.userRoundStatsModel.findOne({
+                where: {
+                    roundId,
+                    userId: roundData.winnerId
+                }
+            });
+
+            if (winnerStats && roundData.winner) {
+                winnerInfo = {
+                    userId: roundData.winnerId,
+                    username: roundData.winner.username,
+                    points: winnerStats.dataValues.points
+                };
             }
         }
 
@@ -117,14 +131,11 @@ export class RoundService {
             where: { roundId, userId },
         });
 
-        const response = {
+        const response: RoundDetails = {
             round: roundData,
             timeUntilStart,
-            winner: winnerStats ? {
-                userId: winnerStats.userId,
-                points: winnerStats.points,
-            } : null,
-            userPoints: userStats ? userStats.points : 0,
+            winner: winnerInfo,
+            userPoints: userStats ? userStats.dataValues.points : 0,
         };
 
         return response;

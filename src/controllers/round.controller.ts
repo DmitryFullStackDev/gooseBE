@@ -4,6 +4,7 @@ import {Roles} from "../decorators/roles.decorator";
 import {RolesGuard} from "../guards/roles.guard";
 import {JwtAuthGuard} from "../guards/jwt-auth.guard";
 import { RoundConfigService } from '../config/round.config';
+import { RoundDetails } from '../types/round.types';
 
 @Controller('rounds')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -46,7 +47,7 @@ export class RoundController {
     async getRoundDetails(
         @Param('id', ParseIntPipe) id: number,
         @Request() req,
-    ) {
+    ): Promise<RoundDetails> {
         return this.roundService.findByIdWithDetails(id, req.user.userId);
     }
 }
