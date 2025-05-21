@@ -17,20 +17,26 @@ import { ScheduleModule } from '@nestjs/schedule';
     ScheduleModule.forRoot(),
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        url: configService.getOrThrow('DATABASE_URL'),
-        dialect: 'postgres',
-        models: [User, Round, UserRoundStats],
-        autoLoadModels: true,
-        sync: { force: true }, // ❗ For dev only! Remove in production
-        dialectOptions: {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false, // Accept self-signed certs (Render's default)
-          },
-        },
-        timezone: '+00:00',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.getOrThrow('DATABASE_URL');
+        const isInternal = databaseUrl.includes('svc-'); // crude check for internal host
+
+        return {
+          url: databaseUrl,
+          dialect: 'postgres',
+          models: [User, Round, UserRoundStats],
+          autoLoadModels: true,
+          timezone: '+00:00',
+          dialectOptions: isInternal
+              ? {}
+              : {
+                ssl: {
+                  require: true,
+                  rejectUnauthorized: false,
+                },
+              },
+        };
+      },
     }),
     AuthModule,
     RoundModule,
