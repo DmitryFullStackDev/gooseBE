@@ -76,6 +76,19 @@
 							"path": ["auth", "login"]
 						}
 					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "http://localhost:3000/auth/logout",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["auth", "logout"]
+						}
+					}
 				}
 			]
 		},
@@ -88,17 +101,13 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "Bearer {{adminToken}}"
-							},
-							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Round 1\"\n}"
+							"raw": "{}"
 						},
 						"url": {
 							"raw": "http://localhost:3000/rounds",
@@ -113,12 +122,6 @@
 					"name": "Get All Rounds",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{userToken}}"
-							}
-						],
 						"url": {
 							"raw": "http://localhost:3000/rounds",
 							"protocol": "http",
@@ -132,12 +135,6 @@
 					"name": "Get Round Details",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{userToken}}"
-							}
-						],
 						"url": {
 							"raw": "http://localhost:3000/rounds/{{roundId}}/details",
 							"protocol": "http",
@@ -156,12 +153,6 @@
 					"name": "Tap Goose (Survivor)",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{survivorToken}}"
-							}
-						],
 						"url": {
 							"raw": "http://localhost:3000/goose/tap/{{roundId}}",
 							"protocol": "http",
@@ -175,12 +166,6 @@
 					"name": "Tap Goose (Nikita)",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{nikitaToken}}"
-							}
-						],
 						"url": {
 							"raw": "http://localhost:3000/goose/tap/{{roundId}}",
 							"protocol": "http",
@@ -194,18 +179,6 @@
 		}
 	],
 	"variable": [
-		{
-			"key": "adminToken",
-			"value": ""
-		},
-		{
-			"key": "nikitaToken",
-			"value": ""
-		},
-		{
-			"key": "survivorToken",
-			"value": ""
-		},
 		{
 			"key": "roundId",
 			"value": ""

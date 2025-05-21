@@ -15,8 +15,8 @@ export class RoundController {
 
     @Post()
     @Roles('admin')
-    async create(@Body() body: { title: string }) {
-        const round = await this.roundService.createRound(body.title);
+    async create() {
+        const round = await this.roundService.createRound();
         const config = this.roundConfigService.config;
         return {
             ...round.toJSON(),

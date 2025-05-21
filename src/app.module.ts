@@ -24,7 +24,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         port: configService.getOrThrow<number>('DB_PORT'),
         models: [User, Round, UserRoundStats],
         autoLoadModels: true,
-        synchronize: true,
+        sync: { force: true },
+        timezone: '+00:00',
+        dialectOptions: {
+          useUTC: true,
+          timezone: '+00:00'
+        }
       }),
     }),
     AuthModule,

@@ -19,44 +19,52 @@ export class RoundService {
         return round;
     }
 
+    private getNowUTC(): Date {
+        return new Date();
+    }
+
     checkIsActive(round: Round): void {
-        const now = new Date();
+        const now = this.getNowUTC();
         if (now < round.startAt || now > round.endAt) {
             throw new ConflictException('Round is not active');
         }
     }
 
     private calculateRoundDates(): { startAt: Date; endAt: Date } {
-        const now = new Date();
+        const now = this.getNowUTC();
         const config = this.roundConfigService.config;
 
-        const startAt = new Date(now.getTime() + config.cooldownDuration * 60000);
-
-        const endAt = new Date(startAt.getTime() + config.roundDuration * 60000);
+        const startAt = new Date(now.getTime() + config.cooldownDuration * 1000);
+        const endAt = new Date(startAt.getTime() + config.roundDuration * 1000);
 
         return { startAt, endAt };
     }
 
-    async createRound(title: string): Promise<Round> {
+    async createRound(): Promise<Round> {
         const latestRound = await this.roundModel.findOne({
             order: [['endAt', 'DESC']],
         });
 
         if (latestRound) {
-            const now = new Date();
-            if (latestRound.endAt > now) {
+            const now = this.getNowUTC();
+            const latestEndAt = latestRound.endAt ? new Date(latestRound.endAt) : null;
+            if (latestEndAt && latestEndAt > now) {
                 throw new ConflictException('Cannot create a new round while another is active or in cooldown');
             }
         }
 
         const { startAt, endAt } = this.calculateRoundDates();
-
-        const round = await this.roundModel.create({
-            title,
-            startAt,
-            endAt,
+        console.log('Creating round with dates:', {
+            startAt: startAt.toISOString(),
+            endAt: endAt.toISOString()
         });
 
+        const round = await this.roundModel.create({
+            startAt: startAt.toISOString(),
+            endAt: endAt.toISOString(),
+        });
+
+        console.log('Created round:', round.toJSON());
         return round;
     }
 
@@ -70,25 +78,55 @@ export class RoundService {
         const round = await this.roundModel.findByPk(roundId);
         if (!round) throw new NotFoundException('Round not found');
 
-        let winnerStats: UserRoundStats | null  = null;
-        const now = new Date();
-        if (now > round.endAt) {
-            winnerStats = await this.userRoundStatsModel.findOne({
-                where: { roundId },
-                order: [['points', 'DESC']],
+        let winnerStats: UserRoundStats | null = null;
+        const now = this.getNowUTC();
+
+        const roundData = round.toJSON();
+        console.log('Complete round data:', JSON.stringify(roundData, null, 2));
+        console.log('Current time:', now);
+
+        let startTime: Date | null = null;
+        try {
+            if (roundData && roundData.startAt) {
+                startTime = new Date(roundData.startAt);
+                console.log('Parsed start time:', startTime);
+            } else {
+                console.log('No start time found in round data');
+            }
+        } catch (error) {
+            console.error('Error parsing start time:', error);
+        }
+
+        let timeUntilStart = 0;
+        if (startTime && !isNaN(startTime.getTime())) {
+            const currentTime = now.getTime();
+            const startTimeMs = startTime.getTime();
+            if (startTimeMs > currentTime) {
+                timeUntilStart = Math.ceil((startTimeMs - currentTime) / 1000);
+            }
+            console.log('Time calculation:', {
+                startTimeMs,
+                currentTime,
+                timeUntilStart
             });
+        }
+
+        if (roundData.endAt) {
+            const endTime = new Date(roundData.endAt);
+            if (!isNaN(endTime.getTime()) && endTime < now) {
+                winnerStats = await this.userRoundStatsModel.findOne({
+                    where: { roundId },
+                    order: [['points', 'DESC']],
+                });
+            }
         }
 
         const userStats = await this.userRoundStatsModel.findOne({
             where: { roundId, userId },
         });
 
-        const timeUntilStart = now < round.startAt
-            ? Math.ceil((round.startAt.getTime() - now.getTime()) / 1000)
-            : 0;
-
-        return {
-            round,
+        const response = {
+            round: roundData,
             timeUntilStart,
             winner: winnerStats ? {
                 userId: winnerStats.userId,
@@ -96,5 +134,8 @@ export class RoundService {
             } : null,
             userPoints: userStats ? userStats.points : 0,
         };
+
+        console.log('Final response:', JSON.stringify(response, null, 2));
+        return response;
     }
 }

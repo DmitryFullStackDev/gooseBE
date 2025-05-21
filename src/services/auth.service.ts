@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from '../models/user.model';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,7 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
-    async login(username: string, password: string) {
+    async login(username: string, password: string, response: Response) {
         if (!username || !password) {
             throw new BadRequestException('Username and password must be provided');
         }
@@ -32,10 +33,15 @@ export class AuthService {
             const payload = { sub: newUser.dataValues.id, username: newUser.dataValues.username, role: newUser.dataValues.role };
             const token = this.jwtService.sign(payload);
 
+            response.cookie('access_token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 24 * 60 * 60 * 1000
+            });
+
             return {
-                payload,
                 message: 'User created',
-                access_token: token,
                 user: {
                     id: newUser.dataValues.id,
                     username: newUser.dataValues.username,
@@ -52,14 +58,27 @@ export class AuthService {
         const payload = { sub: user.dataValues.id, username: user.dataValues.username, role: user.dataValues.role };
         const token = this.jwtService.sign(payload);
 
+        response.cookie('access_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
         return {
             message: 'Login successful',
-            access_token: token,
             user: {
                 id: user.dataValues.id,
                 username: user.dataValues.username,
                 role: user.dataValues.role,
             },
+        };
+    }
+
+    async logout(response: Response) {
+        response.clearCookie('access_token');
+        return {
+            message: 'Logout successful'
         };
     }
 }

@@ -1,8 +1,13 @@
 import { Injectable, Global } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+/**
+ * Configuration interface for round settings
+ */
 export interface RoundConfig {
+    /** Duration of each round in seconds */
     roundDuration: number;
+    /** Cooldown period between rounds in seconds */
     cooldownDuration: number;
 }
 
@@ -20,8 +25,8 @@ export class RoundConfigService {
 
     get config(): RoundConfig {
         return {
-            roundDuration: this.getNumberConfig('ROUND_DURATION', 60),
-            cooldownDuration: this.getNumberConfig('COOLDOWN_DURATION', 30),
+            roundDuration: this.getNumberConfig('ROUND_DURATION', 3600), // Default: 1 hour in seconds
+            cooldownDuration: this.getNumberConfig('COOLDOWN_DURATION', 1800), // Default: 30 minutes in seconds
         };
     }
 } 
