@@ -25,6 +25,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 models: [User, Round, UserRoundStats],
                 autoLoadModels: true,
                 timezone: '+00:00',
+                sync: { force: true },
                 dialectOptions: {
                     useUTC: true,
                     timezone: '+00:00'
