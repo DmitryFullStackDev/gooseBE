@@ -38,7 +38,7 @@ export class RoundService {
         }
 
         if (now > round.dataValues.endAt) {
-            return
+            throw new ConflictException('Round has been ended');
         }
     }
 

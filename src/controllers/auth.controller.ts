@@ -7,7 +7,8 @@ import {
     Res,
     Get,
     UseGuards,
-    UseInterceptors
+    UseInterceptors,
+    Request
 } from '@nestjs/common';
 import { AuthService } from "../services/auth.service";
 import { Response } from 'express';
@@ -23,18 +24,22 @@ class LoginDto {
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    @UseInterceptors(authCookieInterceptor)
     @Post('login')
     async login(
-        @Body() loginDto: LoginDto,
-        @Res({ passthrough: true }) response: Response
+        @Body() loginDto: LoginDto
     ) {
-        return this.authService.login(loginDto.username, loginDto.password, response);
+        return this.authService.login(loginDto.username, loginDto.password);
     }
 
     @UseGuards(JwtAuthGuard)
     @Post('logout')
-    async logout(@Res({ passthrough: true }) response: Response) {
-        return this.authService.logout(response);
+    async logout() {
+        return { message: 'Logout successful' };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('me')
+    async getMe(@Request() req) {
+        return { user: req.user };
     }
 }

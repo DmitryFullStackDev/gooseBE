@@ -9,10 +9,8 @@ import { Request } from 'express';
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(private configService: ConfigService) {
         super({
-            jwtFromRequest: (req: Request) => {
-                return req?.cookies?.['access_token'];
-            },
-            ignoreExpiration: true,
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
             secretOrKey: configService.get<string>('JWT_SECRET'),
         } as any);
     }

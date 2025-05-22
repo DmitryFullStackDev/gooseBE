@@ -12,7 +12,7 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
-    async login(username: string, password: string, response: Response) {
+    async login(username: string, password: string) {
         if (!username || !password) {
             throw new BadRequestException('Username and password must be provided');
         }
@@ -64,10 +64,7 @@ export class AuthService {
         };
     }
 
-    async logout(response: Response) {
-        response.clearCookie('access_token');
-        return {
-            message: 'Logout successful'
-        };
+    async logout() {
+        return { message: 'Logout successful' };
     }
 }
