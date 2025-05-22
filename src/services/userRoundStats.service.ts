@@ -42,11 +42,18 @@ export class UserRoundStatsService {
 
             await stats.reload({ transaction: t });
 
-            await this.roundModel.increment('totalPoints', {
-                by: pointsToAdd,
-                where: { id: roundId },
+            const allStats = await this.statsModel.findAll({
+                where: { roundId },
                 transaction: t,
+                lock: t.LOCK.UPDATE
             });
+            const totalPoints = allStats.length
+                ? allStats.reduce((sum, s) => sum + (typeof s.points === 'number' ? s.points : 0), 0)
+                : 0;
+            await this.roundModel.update(
+                { totalPoints },
+                { where: { id: roundId }, transaction: t }
+            );
 
             return stats;
         });
