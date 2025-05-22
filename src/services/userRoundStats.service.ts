@@ -48,7 +48,7 @@ export class UserRoundStatsService {
                 lock: t.LOCK.UPDATE
             });
             const totalPoints = allStats.length
-                ? allStats.reduce((sum, s) => sum + (typeof s.points === 'number' ? s.points : 0), 0)
+                ? allStats.reduce((sum, s) => sum + (typeof s.dataValues.points === 'number' ? s.dataValues.points : 0), 0)
                 : 0;
             await this.roundModel.update(
                 { totalPoints },
