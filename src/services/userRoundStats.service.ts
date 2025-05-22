@@ -33,8 +33,8 @@ export class UserRoundStatsService {
                 lock: true
             });
 
-            const pointsToAdd = this.calculatePointsForTap(stats.tapsCount);
-
+            const pointsToAdd = this.calculatePointsForTap(stats.dataValues.tapsCount);
+            console.log(pointsToAdd, stats.dataValues.tapsCount, 'pointsToAdd')
             await stats.increment({
                 tapsCount: 1,
                 points: pointsToAdd
