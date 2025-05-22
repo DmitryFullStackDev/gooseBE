@@ -7,7 +7,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "../strategies/jwt.strategy";
 import { ConfigService } from '@nestjs/config';
-import {HealthController} from "../controllers/helth.controller";
+import {HealthController} from "../controllers/health.controller";
 
 @Module({
     imports: [
@@ -19,7 +19,7 @@ import {HealthController} from "../controllers/helth.controller";
                 secret: configService.get<string>('JWT_SECRET'),
                 signOptions: { expiresIn: '1h' },
             }),
-        }),
+        }  as any),
     ],
     providers: [AuthService, JwtStrategy],
     controllers: [AuthController, HealthController],
