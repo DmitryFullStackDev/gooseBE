@@ -118,6 +118,7 @@ npm run start:dev
 
 - All endpoints require authentication (except `/auth/login` and `/health`).
 - See the [original task](https://github.com/round-squares/tech-task-for-interview/wiki#%D0%BC%D0%BE%D0%BA%D0%B0%D0%BF%D1%8B) for more details.
+- ⚠️ **Your free instance will spin down with inactivity, which can delay requests by 50 seconds or more.**
 
 ---
 
