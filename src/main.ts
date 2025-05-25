@@ -8,6 +8,7 @@ async function bootstrap() {
     'https://goose-fe-dmitryfullstackdevs-projects.vercel.app',
     'https://goose-fe.vercel.app',
     'https://goose-fe-dmitryfullstackdevs-projects.vercel.app',
+    "http://localhost:5173"
   ];
 
   app.enableCors({
